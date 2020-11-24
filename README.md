@@ -6,7 +6,7 @@ npm start   <br/>
 
 cd ./server <br/>
 npm install <br/>
-node start <br/>
+npm start <br/>
 
 
 <h1>Docker:</h1>
