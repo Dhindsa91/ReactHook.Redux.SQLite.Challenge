@@ -9,7 +9,7 @@ npm install <br/>
 node src/index.js <br/>
 
 
-<h1>Docker</h1>
+<h1>Docker:</h1>
 docker-compose build <br/>
 docker-compose up <br/>
 
