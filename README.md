@@ -6,7 +6,7 @@ npm start   <br/>
 
 cd ./server <br/>
 npm install <br/>
-node src/index.js <br/>
+node start <br/>
 
 
 <h1>Docker:</h1>
