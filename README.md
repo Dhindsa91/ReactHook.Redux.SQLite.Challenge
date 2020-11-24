@@ -16,6 +16,7 @@ docker-compose up <br/>
 
 
 ************
+*running on localhost:3000 <br/>
 -Application uses Redux for global state  
 -State persists through refresh  
 -Axios to make http requests  
