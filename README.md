@@ -1,8 +1,8 @@
 Build:
 
-cd ./client
-npm install
-npm start
+cd ./client <br/>
+npm install <br/>
+npm start   <br/>
 
 cd ./server
 npm install
