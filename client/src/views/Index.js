@@ -1,36 +1,46 @@
-import React, { useState, useSelector, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import store from '../redux/store'
+import store from '../redux/store';
+import {useSelector, useDispatch} from 'react-redux';
 
 
 export default function Index() {
     const [description, setDescription] = useState("");
     const [dueDate, setDueDate] = useState("");
     const [status, setStatus] = useState("todo");
-    const [todo, setTodo] = useState([]);
+    const [todos, setTodos] = useState([]);
     const [msg, setMsg] = useState("");
-    //const user = useSelector(state => state.user.user.username);
+    
+    var user = useSelector(state => state.user.user.username);
+ 
 
-    // useEffect(async() => {
-    //   return await axios({
-    //     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    //     method: 'get',
-    //     url: `http://localhost:3001/get-posts/${store.getState().user.user.username}`
-    //   })
-    //   .then(response => {
-    //     console.log("TODOS", response);
-    //     if(response.data.ok){
-    //         setTodo(response.data.row);
-    //     }
-    //   })
-    //   .catch(err=>{
-    //     console.log(err);
-    //   })
-    // });
+    const dispatch = useDispatch();
 
+    //Get our todos on load  
+    useEffect(async() => {
+
+       await axios({
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        method: 'get',
+        url: `http://localhost:3001/get-posts/${user}`
+      })
+      .then(response => {
+        console.log("RESPONSE", response)
+        if(response.data.ok){
+          let data = response.data.rows;
+          if(Array.isArray(data)) setTodos(data);
+          else setTodos(todos.push(data));
+          
+          dispatch({type: "SET_TODO", payload: data})
+        }
+      })
+      .catch(err=>{
+        console.log(err);
+      })
+    }, []);
+
+    //Create Todo
     const handleCreateTodo = async() => {
-
-      console.log(description, dueDate, status);
       setMsg("");
       if(!description || !dueDate || !status) return setMsg("Please Complete All Fields");
       
@@ -43,9 +53,29 @@ export default function Index() {
           description,
           dueDate,
           status,
-          user: store.getState().user.user.username
+          username: user
           
         },
+      }).then(async()=>{
+            // Get todos
+            await axios({
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+              method: 'get',
+              url: `http://localhost:3001/get-posts/${user}`
+            })
+            .then(response => {
+              console.log("RESPONSE", response)
+              if(response.data.ok){
+                let data = response.data.rows;
+                if(Array.isArray(data)) setTodos(data);
+                else setTodos(todos.push(data));
+                
+                dispatch({type: "SET_TODO", payload: data})
+              }
+            })
+            .catch(err=>{
+              console.log(err);
+            })
       }).catch(err=>{
         console.log(err);
       })
@@ -65,18 +95,17 @@ export default function Index() {
                   </tr>
                 </thead>
                 <tbody>
-                  { todos.forEach(todo =>{
-                  return(  
-                  <tr>
-                    <td></td>
-                    <td>2</td>
-                    <td>3</td>
-                  </tr>
-                  </tr>
-                  )
-                  })
+                {todos.map(todo=>{
+                    return( 
+                            <tr>
+                            <td>{todo.description}</td>
+                            <td>{todo.dueDate}</td>
+                            <td>{todo.status}</td>
+                            </tr> 
+                          )
+                        })
                   }
-                  </tbody>
+                </tbody>
               </table>
             </div>
             <div className="create-todo">

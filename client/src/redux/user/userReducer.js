@@ -1,12 +1,14 @@
 import { SET_USER, LOG_OUT_USER } from "./userTypes";
 
 const initialState = {
-  user: null,
+  user: {
+    username: "",
+    token: ""
+  },
 };
 
 const userReducer = (state = initialState, action) => {
-  console.log("state", state);
-  console.log("initialState", initialState);
+
   switch (action.type) {
     case SET_USER:
       return {

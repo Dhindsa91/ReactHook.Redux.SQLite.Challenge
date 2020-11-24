@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import store from '../redux/store'
 import {setUser} from "../redux/"
+import { useDispatch } from "react-redux";
 
 
 export default function Login(props) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [msg, setMsg] = useState("");
+
+    const dispatch = useDispatch();
 
 
     const handleSubmit = (event) => {
@@ -25,10 +28,11 @@ export default function Login(props) {
             if(response.data.ok){
                 localStorage.setItem("username", response.data.username);
                 localStorage.setItem("token", response.data.token);
-                store.dispatch(setUser({
+        
+                dispatch({type: "SET_USER", payload: {
                     username: response.data.username,
                     token: response.data.token
-                }));
+                }})
                 props.history.push("/");
             }else{
                 setMsg("Incorrect username or password");

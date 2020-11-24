@@ -6,15 +6,15 @@ import jwt from "jsonwebtoken";
 
 const sqlite3 = require('sqlite3').verbose();
 
-var db = new sqlite3.Database('abc');
+var db = new sqlite3.Database('my.db');
 
 db.serialize(function(){
-    db.run("DROP TABLE user");
-    db.run("DROP TABLE todo");
+    db.run("DROP TABLE IF EXISTS user");
+    db.run("DROP TABLE IF EXISTS todo");
     db.run("CREATE TABLE user (id INT, username TEXT, password TEXT)");
     db.run("CREATE TABLE todo (description TEXT, dueDate TEXT, status TEXT, owner TEXT)");
 
-
+    console.log("initializing db...");
     let stmt = db.prepare("INSERT INTO user values(1, 'user01', 'superdupersecure01')");
     let stmt2 = db.prepare(`INSERT INTO todo values('Sample Todo', '11-11-2020', 'done', 'user01')`);
 
@@ -23,7 +23,7 @@ db.serialize(function(){
 
     db.each("SELECT id, username, password FROM user", function(err, row){
 
-        console.log("US11ER:", row);
+        console.log("USER:", row);
     })
 
     stmt.finalize();
@@ -77,9 +77,8 @@ app.post("/login", function(req,res,next){
 })
 
 app.get("/get-posts/:username", verifyToken, function(req,res,next){
-
     const username = req.params.username;
-
+    var todos = [];
     jwt.verify(
         req.token,
         "asdfasdf",
@@ -88,16 +87,16 @@ app.get("/get-posts/:username", verifyToken, function(req,res,next){
             if (err) {
                 res.sendStatus(403);
             } else {
-                db.each(`SELECT description, dueDate, status FROM todo WHERE owner = '${username}'` , function(err, row){
-                    console.log("Row", row);
-                    if(!row){
+                
+                db.all(`SELECT description, dueDate, status FROM todo WHERE owner = '${username}'` , function(err, rows){
+                    
+                    if(!rows){
                         return res.send({ ok: false });
                     }else{
-                        const token = jwt.sign({ username }, "asdfasdf", {
-                            audience: username});
-                        return res.send({ ok: true, row });
+                        return res.send({ ok: true, rows });
                     }
                 });
+               
             }
         }
     );
@@ -111,12 +110,20 @@ app.post("/create-post", verifyToken, function(req, res, next){
         { audience: username },
         (err, auth) => {
             if (err) {
+                console.log(err);
                 res.sendStatus(403);
             } else {
-                let stmt = db.prepare(`INSERT INTO todo values('${description}', '${dueDate}', '${status}', '${username}')`);
-                stmt.run();
-                stmt.finalize();
-                console.log("todo created...");
+                try{
+                    let stmt = db.prepare(`INSERT INTO todo values('${description}', '${dueDate}', '${status}', '${username}')`);
+                    stmt.run();
+                    stmt.finalize();
+                    console.log("todo created...");
+        
+                    res.send({ok: true});
+                }catch(err){
+                    console.log(err);
+                    res.send({ok: false});
+                }
             }
         }
     );
